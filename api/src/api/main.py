@@ -18,17 +18,12 @@ from PIL import Image
 from shapely.geometry import Polygon
 from torchvision import transforms
 
-from api.models import UNet
-from api.utils import float_nanmean, from_base64, clip
-from api.split import merge_models
+from api import UNet, float_nanmean, from_base64, clip, merge_models
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 16 * (1024**3)
 app.config["MAX_FORM_MEMORY_SIZE"] = 16 * (1024**3)
 app.config["MAX_FORM_PARTS"] = 16 * (1024**3)
-
-# Find all models in the models folder
-model_paths = list(Path("./models").rglob("*.pth"))
 
 
 @dataclass
@@ -61,13 +56,15 @@ class RodsRingsMeasurements:
 
 
 def initialise_models():
-    model_paths = list(Path("./models").rglob("*.pth"))
+    model_paths = list(Path("models").rglob("*.pth"))
 
     if model_paths == []:
         # Model paths need to be unpacked from the shards
         merge_models()
 
-        model_paths = list(Path("./models").rglob("*.pth"))
+        model_paths = list(Path("models").rglob("*.pth"))
+        if model_paths == []:
+            raise ValueError("EMPTY MODEL PATHS!")
 
     return model_paths
 
@@ -184,7 +181,8 @@ def analyse_image(
 
     for model_path in list(model_paths):
         model = UNet(1, 2)
-        model.load_state_dict(torch.load(model_path))
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        model.load_state_dict(torch.load(model_path, map_location=torch.device(device)))
         model.eval()
 
         rod, ring = model(img)
@@ -236,7 +234,6 @@ def analyse_files_in_zip(zipdata: BytesIO) -> tp.Dict[str, str]:
                 continue
 
             with zip_ref.open(file) as f:
-                print(f)
                 img = Image.open(f)
                 img, measurements = analyse_image(img)
 
@@ -285,7 +282,6 @@ def batch_predict():
 @app.route("/api/predict", methods=["POST"])
 def predict():
     # Convert image from base64 to numpy array
-    print("Context length", request.content_length)
     decoded = from_base64(request.form["image"])
     image = Image.open(BytesIO(decoded))
 
@@ -297,6 +293,12 @@ def predict():
     return {"image": img_str, "measurements": measurements}
 
 
+@app.route("/api/test")
+def test_api():
+    return "hello world"
+
+
 if __name__ == "__main__":
-    initialise_models()
-    app.run()
+    global model_paths
+    model_paths = initialise_models()
+    app.run(host="0.0.0.0", port=8080)

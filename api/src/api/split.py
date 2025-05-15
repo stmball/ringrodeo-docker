@@ -7,8 +7,9 @@ from pathlib import Path
 
 
 def merge_models():
-    split_models_path = Path("./split_models")
-    models_path = Path("./models")
+    split_models_path = Path("split_models/")
+    models_path = Path("models/")
+    models_path.mkdir(exist_ok=True)
 
     for folder in list(split_models_path.glob("*")):
         merger = Merge(
@@ -23,7 +24,7 @@ def split_models():
     models_path = Path("./models")
 
     for model_file in list(models_path.rglob("*.pth")):
-        output_dir = split_models_path / model_file.stem
+        output_dir = split_models_path / model_file.name
 
         output_dir.mkdir(parents=True, exist_ok=True)
 

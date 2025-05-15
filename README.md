@@ -16,4 +16,8 @@ This will spin up the Python Flask backend API (that performs the segmentation) 
 
 > The segmentation is really slow/crashes my machine!
 
-The model attempts to find a GPU on your computer - if not, it uses the CPU which might use significant resources. In short - it's deep learning; it needs a pretty beefy computer!
+The model attempts to find a GPU on your computer - if not, it uses the CPU which might use significant resources (it may crash with <8GB RAM). In short - it's deep learning; it needs a pretty beefy computer!
+
+> Help! I get an error *and* it says the API exited with code 137
+
+This is because you need to give Docker more RAM. Go into the Docker desktop App > Settings > resources and turn up the memory!

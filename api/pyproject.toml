@@ -1,8 +1,7 @@
 [project]
 name = "api"
 version = "0.1.0"
-description = "Add your description here"
-authors = [{ name = "stmball", email = "stmball@gmail.com" }]
+authors = [{ name = "Samuel Ball", email = "samuel.ball@liverpool.ac.uk" }]
 dependencies = [
   "shapely>=2.1.0",
   "matplotlib>=3.10.3",

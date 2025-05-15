@@ -4,13 +4,14 @@ RUN pip install uv
 
 WORKDIR /app 
 
-COPY . . 
+COPY . .
 
 RUN uv pip install --no-cache --system -r requirements.lock
 
+EXPOSE 8080
 
-EXPOSE 5000
+ENV FLASK_APP=src/api/main.py 
 
-ENV FLASK_APP=src/api/api.py
+ENV PYTHONPATH="${PYTHONPATH}:/app/src"
 
-CMD ["flask", "run", "--host", "0.0.0.0"]
+CMD ["python", "src/api/main.py"]

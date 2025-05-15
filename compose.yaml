@@ -1,0 +1,21 @@
+services:
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - app-network
+  api:
+    container_name: api
+    build: ./api
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+networks: 
+  app-network:
+    driver: bridge
